@@ -25,31 +25,29 @@ public class ProductController {
 
     @GetMapping("")
     public ResponseEntity<List<ResponseProductDto>> allProducts() {
-        List<Product> products = productService.getAllProducts();
-        List<ResponseProductDto> responseProductDtos = products.stream()
-                .map(product -> productService.transformToDto(product))
-                .collect(Collectors.toList());
-        return new ResponseEntity<>(responseProductDtos, HttpStatus.OK);
+        List<ResponseProductDto> products = productService.getAllProducts();
+
+        return new ResponseEntity<>(products, HttpStatus.OK);
     }
 
     @PostMapping("")
     @PreAuthorize("hasRole('{ADMIN}')")
     public ResponseEntity<ResponseProductDto> newProduct(@Valid @RequestBody CreateProductDto newProduct) {
-        Product createdProductDto = productService.createProduct(newProduct);
-        return new ResponseEntity<>(this.productService.transformToDto(createdProductDto), HttpStatus.CREATED);
+        ResponseProductDto createdProductDto = productService.createProduct(newProduct);
+        return new ResponseEntity<>(createdProductDto, HttpStatus.CREATED);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<ResponseProductDto> getProductById(@PathVariable Long id) {
-        Product productDto = productService.getProductById(id);
-        return new ResponseEntity<>(this.productService.transformToDto(productDto), HttpStatus.OK);
+        ResponseProductDto productDto = productService.getProductById(id);
+        return new ResponseEntity<>(productDto, HttpStatus.OK);
     }
 
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<ResponseProductDto> updateProduct(@RequestBody Product newProduct, @PathVariable Long id) {
-        Product updatedProductDto = productService.updateProduct(id, newProduct);
-        return new ResponseEntity<>(this.productService.transformToDto(updatedProductDto), HttpStatus.OK);
+        ResponseProductDto updatedProductDto = productService.updateProduct(id, newProduct);
+        return new ResponseEntity<>(updatedProductDto, HttpStatus.OK);
     }
 
     @DeleteMapping("/{id}")

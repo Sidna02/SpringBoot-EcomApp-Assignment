@@ -10,6 +10,7 @@ import java.time.LocalDateTime;
 @Value
 @AllArgsConstructor
 public class ResponseProductDto implements Serializable {
+    Long id;
     String name;
     String description;
     BigDecimal price;

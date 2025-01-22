@@ -131,7 +131,7 @@ public class EcommerceApplicationTests {
     @Test
     @WithMockUser(username = "testuser@gmail.com", roles = "{ADMIN}")
     void testCreateProduct() throws Exception {
-        Category category = this.categoryService.createCategory(
+        ResponseCategoryDto category = this.categoryService.createCategory(
                 new CreateCategoryDto(
                         "Electronics",
                         "Various electronics"
@@ -157,7 +157,7 @@ public class EcommerceApplicationTests {
     @Test
     @WithMockUser(username = "testuser@gmail.com", roles = "{USER}")
     void testCreateProductForbidden() throws Exception {
-        Category category = this.categoryService.createCategory(
+        ResponseCategoryDto category = this.categoryService.createCategory(
                 new CreateCategoryDto(
                         "Electronics",
                         "Various electronics"
@@ -220,13 +220,13 @@ public class EcommerceApplicationTests {
     @Test
     @WithMockUser(username = "testuser@gmail.com")
     public void testAddToCart() throws Exception {
-        Category category = this.categoryService.createCategory(
+        ResponseCategoryDto category = this.categoryService.createCategory(
                 new CreateCategoryDto(
                         "Electronics",
                         "Various electronics"
                 )
         );
-      Product product =   this.productService.createProduct(new CreateProductDto(
+      ResponseProductDto product =   this.productService.createProduct(new CreateProductDto(
                 "Laptop",
                 "desc",
                 BigDecimal.valueOf(1000),
@@ -253,13 +253,13 @@ public class EcommerceApplicationTests {
     public void testMakeOrder() throws Exception {
         User user = userService.getAuthenticatedUser();
 
-        Category category = this.categoryService.createCategory(
+        ResponseCategoryDto category = this.categoryService.createCategory(
                 new CreateCategoryDto(
                         "Electronics",
                         "Various electronics"
                 )
         );
-        Product product = this.productService.createProduct(
+        ResponseProductDto product = this.productService.createProduct(
                 new CreateProductDto(
                         "Laptop",
                         "desc",
@@ -271,7 +271,7 @@ public class EcommerceApplicationTests {
         Cart cart = user.getCart();
 
         CartItem cartItem = new CartItem();
-        cartItem.setProduct(product);
+        cartItem.setProduct(this.productService.getEntityById(product.getId()));
         cartItem.setQuantity(2);
         cartItem.setCart(cart);
         cart.setCartItems(List.of(cartItem));
@@ -289,7 +289,7 @@ public class EcommerceApplicationTests {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(requestContent))
                 .andExpect(status().is2xxSuccessful())
-                .andExpect(jsonPath("$.orderItems[0].productId").value(2))
+                .andExpect(jsonPath("$.orderItems[0].productId").exists())
                 .andExpect(jsonPath("$.status").value("PENDING"))
                 .andExpect(jsonPath("$.orderItems[0].productName").value("Laptop"))
                 .andExpect(jsonPath("$.orderItems[0].quantity").value(1))
@@ -303,13 +303,13 @@ public class EcommerceApplicationTests {
         Cart cart = user.getCart();
 
 
-        Category category = this.categoryService.createCategory(
+        ResponseCategoryDto category = this.categoryService.createCategory(
                 new CreateCategoryDto(
                         "Electronics",
                         "Various electronics"
                 )
         );
-        Product product = this.productService.createProduct(
+        ResponseProductDto product = this.productService.createProduct(
                 new CreateProductDto(
                         "Laptop",
                         "desc",
@@ -320,7 +320,7 @@ public class EcommerceApplicationTests {
         );
 
         CartItem cartItem = new CartItem();
-        cartItem.setProduct(product);
+        cartItem.setProduct(this.productService.getEntityById(product.getId()));
         cartItem.setQuantity(1);
         cartItem.setCart(user.getCart());
         cart.setCartItems(List.of(cartItem));

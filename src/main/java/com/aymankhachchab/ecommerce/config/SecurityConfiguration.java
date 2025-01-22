@@ -30,9 +30,9 @@ public class SecurityConfiguration {
                         .requestMatchers("/error").permitAll()
                         .anyRequest().authenticated()
                 )
-                .exceptionHandling(ex -> ex.authenticationEntryPoint(point)) // Set the authentication entry point
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // Stateless session management
-                .addFilterBefore(filter, UsernamePasswordAuthenticationFilter.class); // Add custom filter before default filter
+                .exceptionHandling(ex -> ex.authenticationEntryPoint(point))  
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))  
+                .addFilterBefore(filter, UsernamePasswordAuthenticationFilter.class);  
 
         return http.build();
     }

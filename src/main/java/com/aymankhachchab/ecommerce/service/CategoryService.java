@@ -7,6 +7,7 @@ import com.aymankhachchab.ecommerce.repository.CategoryRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class CategoryService {
@@ -17,32 +18,47 @@ public class CategoryService {
         this.categoryRepository = categoryRepository;
     }
 
+     
     public ResponseCategoryDto transformCategoryToDto(Category category) {
-        return new ResponseCategoryDto(category.getName(), category.getDescription());
+        return new ResponseCategoryDto(category.getId(), category.getName(), category.getDescription());
     }
 
-    public List<Category> all() {
-        return categoryRepository.findAll();
+     
+    public List<ResponseCategoryDto> all() {
+        return categoryRepository.findAll().stream()
+                .map(this::transformCategoryToDto)
+                .collect(Collectors.toList());
     }
 
-    public Category createCategory(CreateCategoryDto createCategoryDto) {
+     
+    public ResponseCategoryDto createCategory(CreateCategoryDto createCategoryDto) {
         Category category = new Category();
         category.setName(createCategoryDto.getName());
         category.setDescription(createCategoryDto.getDescription());
-        return categoryRepository.saveAndFlush(category);
+        Category savedCategory = categoryRepository.saveAndFlush(category);
+        return transformCategoryToDto(savedCategory);   
     }
 
-    public Category getCategoryById(Long id) {
-        return categoryRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Category not found"));
+     
+    public ResponseCategoryDto getCategoryById(Long id) {
+        Category category = categoryRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Category not found"));
+        return transformCategoryToDto(category);
     }
 
-    public Category updateCategory(Long id, Category newCategory) {
-        Category oldCategory = categoryRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Category not found"));
-        oldCategory.setName(newCategory.getName());
-        oldCategory.setDescription(newCategory.getDescription());
-        return categoryRepository.saveAndFlush(oldCategory);
+     
+    public ResponseCategoryDto updateCategory(Long id, Category newCategoryDetails) {
+        Category oldCategory = categoryRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Category not found"));
+
+        oldCategory.setName(newCategoryDetails.getName());
+        oldCategory.setDescription(newCategoryDetails.getDescription());
+
+        Category updatedCategory = categoryRepository.saveAndFlush(oldCategory);
+        return transformCategoryToDto(updatedCategory);   
     }
 
+     
     public void deleteCategory(Long id) {
         categoryRepository.deleteById(id);
     }

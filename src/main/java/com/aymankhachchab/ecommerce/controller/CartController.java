@@ -3,15 +3,13 @@ package com.aymankhachchab.ecommerce.controller;
 import com.aymankhachchab.ecommerce.dto.RequestCartItemDto;
 import com.aymankhachchab.ecommerce.dto.ResponseCartItem;
 import com.aymankhachchab.ecommerce.dto.ResponseOrderDto;
+import com.aymankhachchab.ecommerce.dto.ResponseProductDto;
 import com.aymankhachchab.ecommerce.entity.CartItem;
 import com.aymankhachchab.ecommerce.entity.Order;
 import com.aymankhachchab.ecommerce.entity.Product;
 import com.aymankhachchab.ecommerce.entity.User;
 import com.aymankhachchab.ecommerce.repository.ProductRepository;
-import com.aymankhachchab.ecommerce.service.AuthorizationService;
-import com.aymankhachchab.ecommerce.service.CartService;
-import com.aymankhachchab.ecommerce.service.OrderService;
-import com.aymankhachchab.ecommerce.service.UserService;
+import com.aymankhachchab.ecommerce.service.*;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -27,28 +25,28 @@ public class CartController {
 
     private final CartService cartService;
     private final UserService userService;
-    private final ProductRepository productRepository;
     private final OrderService orderService;
+    private final ProductService productService;
     @Autowired
     private final AuthorizationService authorizationService;
 
-    public CartController(CartService cartService, UserService userService, ProductRepository productRepository, OrderService orderService, AuthorizationService authorizationService) {
+    public CartController(CartService cartService, UserService userService, OrderService orderService, ProductService productService, AuthorizationService authorizationService) {
         this.cartService = cartService;
         this.userService = userService;
-        this.productRepository = productRepository;
         this.orderService = orderService;
+        this.productService = productService;
         this.authorizationService = authorizationService;
     }
 
     @PostMapping("/add")
     public ResponseEntity<ResponseCartItem> addToCart(@Valid @RequestBody RequestCartItemDto requestCartItemDto) {
-        Product product = this.productRepository.findById(requestCartItemDto.getProductId()).orElse(null);
+        ResponseProductDto product = this.productService.getProductById(requestCartItemDto.getProductId());
         if (product == null) {
             return ResponseEntity.badRequest().build();
         }
 
-        CartItem cartItem = cartService.addToCart(product, requestCartItemDto.getQuantity());
-        return ResponseEntity.ok(this.cartService.transformCartItemToDto(cartItem));
+        ResponseCartItem cartItem = cartService.addToCart(product, requestCartItemDto.getQuantity());
+        return ResponseEntity.ok(cartItem);
     }
 
     @PostMapping("/order")

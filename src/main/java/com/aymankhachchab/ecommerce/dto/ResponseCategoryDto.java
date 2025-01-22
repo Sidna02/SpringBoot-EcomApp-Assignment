@@ -11,6 +11,7 @@ import java.io.Serializable;
 @Value
 @AllArgsConstructor
 public class ResponseCategoryDto implements Serializable {
+    Long id;
     String name;
     String description;
 }

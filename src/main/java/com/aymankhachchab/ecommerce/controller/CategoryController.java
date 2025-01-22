@@ -23,34 +23,47 @@ public class CategoryController {
     }
 
     @GetMapping("")
-    public List<Category> allCategories() {
-        return this.categoryService.all();
+    public ResponseEntity<List<ResponseCategoryDto>> allCategories() {
+        List<ResponseCategoryDto> categories = categoryService.all();
+        return ResponseEntity.ok(categories);
     }
 
     @PostMapping("")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ResponseCategoryDto> newCategory(@Valid @RequestBody CreateCategoryDto newCategory) {
-        Category category = categoryService.createCategory(newCategory);
-        ResponseCategoryDto response = categoryService.transformCategoryToDto(category);
-        return new ResponseEntity<>(response, HttpStatus.CREATED);
+        ResponseCategoryDto category = categoryService.createCategory(newCategory);
+        return ResponseEntity.status(HttpStatus.CREATED).body(category);
     }
 
     @GetMapping("/{id}")
-
-    public Category one(@PathVariable Long id) {
-        return categoryService.getCategoryById(id);
+    public ResponseEntity<ResponseCategoryDto> getCategoryById(@PathVariable Long id) {
+        try {
+            ResponseCategoryDto category = categoryService.getCategoryById(id);
+            return ResponseEntity.ok(category);
+        } catch (IllegalArgumentException ex) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
     }
 
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-
-    public Category replaceCategory(@RequestBody Category newCategory, @PathVariable Long id) {
-        return categoryService.updateCategory(id, newCategory);
+    public ResponseEntity<ResponseCategoryDto> replaceCategory(@RequestBody Category newCategory, @PathVariable Long id) {
+        try {
+            ResponseCategoryDto updatedCategory = categoryService.updateCategory(id, newCategory);
+            return ResponseEntity.ok(updatedCategory);
+        } catch (IllegalArgumentException ex) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
     }
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    public void deleteCategory(@PathVariable Long id) {
-        categoryService.deleteCategory(id);
+    public ResponseEntity<Void> deleteCategory(@PathVariable Long id) {
+        try {
+            categoryService.deleteCategory(id);
+            return ResponseEntity.noContent().build();
+        } catch (IllegalArgumentException ex) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
     }
 }

@@ -9,6 +9,7 @@ import com.aymankhachchab.ecommerce.repository.ProductRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class ProductService {
@@ -21,30 +22,37 @@ public class ProductService {
         this.categoryRepository = categoryRepository;
     }
 
-    public List<Product> getAllProducts() {
-        return productRepository.findAll();
+     
+    public List<ResponseProductDto> getAllProducts() {
+        return productRepository.findAll().stream()
+                .map(this::transformToDto)
+                .collect(Collectors.toList());
     }
 
-    public Product createProduct(CreateProductDto newProduct) {
+     
+    public ResponseProductDto createProduct(CreateProductDto newProduct) {
         Product product = new Product();
         product.setName(newProduct.getName());
         product.setPrice(newProduct.getPrice());
         product.setStockQuantity(newProduct.getStockQuantity());
 
-
         Category category = categoryRepository.findById(newProduct.getCategoryId())
                 .orElseThrow(() -> new IllegalArgumentException("Category not found"));
         product.setCategory(category);
 
-        return productRepository.saveAndFlush(product);
+        Product savedProduct = productRepository.saveAndFlush(product);
+        return transformToDto(savedProduct);   
     }
 
-    public Product getProductById(Long id) {
-        return productRepository.findById(id)
+     
+    public ResponseProductDto getProductById(Long id) {
+        Product product = productRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Product not found"));
+        return transformToDto(product);
     }
 
-    public Product updateProduct(Long id, Product newProductDetails) {
+     
+    public ResponseProductDto updateProduct(Long id, Product newProductDetails) {
         Product existingProduct = productRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Product not found"));
 
@@ -52,23 +60,29 @@ public class ProductService {
         existingProduct.setDescription(newProductDetails.getDescription());
         existingProduct.setPrice(newProductDetails.getPrice());
 
-        return productRepository.saveAndFlush(existingProduct);
+        Product updatedProduct = productRepository.saveAndFlush(existingProduct);
+        return transformToDto(updatedProduct);
     }
 
+     
     public void deleteProduct(Long id) {
         productRepository.deleteById(id);
     }
 
+     
     public ResponseProductDto transformToDto(Product product) {
         return new ResponseProductDto(
+                product.getId(),
                 product.getName(),
                 product.getDescription(),
                 product.getPrice(),
                 product.getStockQuantity(),
                 product.getCreatedAt(),
                 product.getCategory().getName()
-
         );
+    }
 
+    public Product getEntityById(Long id) {
+        return this.productRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Product not found"));
     }
 }

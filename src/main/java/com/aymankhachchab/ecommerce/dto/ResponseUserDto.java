@@ -11,6 +11,7 @@ import java.io.Serializable;
  */
 @Value
 public class ResponseUserDto implements Serializable {
+
     String name;
     @Email
     @NotBlank
